@@ -1,0 +1,211 @@
+/* pm-static.css: additions for the static copy of PhotoMap. */
+
+/* Progress message while the CLIP search model downloads. */
+.pm-static-toast {
+  position: fixed;
+  left: 50%;
+  top: 16px;
+  transform: translateX(-50%);
+  z-index: 100000;
+  max-width: calc(100vw - 32px);
+  padding: 10px 16px;
+  border-radius: 8px;
+  background: rgba(20, 20, 20, 0.92);
+  color: #f2f2f2;
+  font: 14px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  pointer-events: none;
+}
+
+.pm-static-toast-error {
+  background: rgba(140, 30, 30, 0.95);
+}
+
+/* ------------------------------------------------------------------
+   Semantic map controls: one compact row under the map.
+   PhotoMap lays these out with inline styles, hence the !important.
+   The yellow accent is PhotoMap's own (active buttons, stars).
+   ------------------------------------------------------------------ */
+#umapControls {
+  --pm-text: #e8e9ef;
+  --pm-muted: #a4a7b5;
+  --pm-line: rgba(255, 255, 255, 0.16);
+  --pm-line-hover: rgba(255, 255, 255, 0.32);
+  --pm-fill: rgba(255, 255, 255, 0.06);
+  --pm-accent: #ffd600;
+  color-scheme: dark;
+  color: var(--pm-text);
+  font-size: 13px;
+  line-height: 1;
+}
+
+#umapControls > div {
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px 22px !important;
+  margin: 8px 0 0 !important;
+}
+
+#umapEpsContainer:not([style*="none"]),
+#umapColorModeContainer {
+  display: flex !important;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px !important;
+  font-size: inherit !important;
+}
+
+#umapControls .pm-group-label,
+#umapEpsContainer > label {
+  color: var(--pm-muted);
+  white-space: nowrap;
+}
+
+#umapControls .pm-group-label {
+  margin-left: 16px;
+}
+
+/* Cluster strength field */
+#umapEpsSpinner {
+  box-sizing: border-box;
+  width: 66px !important;
+  height: 28px;
+  padding: 0 4px 0 9px;
+  border: 1px solid var(--pm-line);
+  border-radius: 7px;
+  background: var(--pm-fill);
+  color: var(--pm-text);
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+}
+
+#umapEpsSpinner:hover {
+  border-color: var(--pm-line-hover);
+}
+
+#umapEpsSpinner:focus {
+  outline: none;
+  border-color: var(--pm-accent);
+}
+
+/* "Click selects" as a two-part switch */
+#umapClickBehaviorContainer {
+  flex-direction: row !important;
+  gap: 2px !important;
+  margin: 0 !important;
+  padding: 2px;
+  border: 1px solid var(--pm-line);
+  border-radius: 8px;
+  font-size: inherit !important;
+}
+
+#umapClickBehaviorContainer label {
+  position: relative;
+  height: 22px;
+  padding: 0 10px;
+  border-radius: 6px;
+  color: var(--pm-muted);
+  font-size: inherit !important;
+  transition: background-color 0.15s, color 0.15s;
+}
+
+#umapClickBehaviorContainer label:hover {
+  color: var(--pm-text);
+}
+
+#umapClickBehaviorContainer label:has(input:checked) {
+  background: rgba(255, 255, 255, 0.13);
+  color: #fff;
+}
+
+#umapClickBehaviorContainer input[type="radio"] {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+/* Option toggles as chips */
+#umapColorModeContainer label {
+  gap: 7px !important;
+  height: 28px;
+  padding: 0 11px 0 9px;
+  border: 1px solid var(--pm-line);
+  border-radius: 999px;
+  color: var(--pm-muted);
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+}
+
+#umapColorModeContainer label:hover {
+  border-color: var(--pm-line-hover);
+  color: var(--pm-text);
+}
+
+#umapColorModeContainer label:has(input:checked) {
+  border-color: var(--pm-line-hover);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--pm-text);
+}
+
+/* Map options first, then the window behavior option. */
+#umapColorModeContainer label:has(#umapShowLandmarks) { order: 1; }
+#umapColorModeContainer label:has(#umapShowHoverThumbnails) { order: 2; }
+#umapColorModeContainer label:has(#umapHighlightSelection) { order: 3; }
+#umapColorModeContainer .pm-clear-link { order: 4; }
+#umapColorModeContainer label:has(#umapExitFullscreenOnSelection) { order: 5; margin-left: 12px; }
+
+#umapColorModeContainer label:has(input:disabled) {
+  opacity: 0.45 !important;
+  border-color: var(--pm-line);
+  cursor: default;
+}
+
+#umapColorModeContainer input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  flex: none;
+  width: 14px;
+  height: 14px;
+  margin: 0 !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.45);
+  border-radius: 4px;
+  background: transparent center / 10px 10px no-repeat;
+  cursor: inherit;
+}
+
+#umapColorModeContainer input[type="checkbox"]:checked {
+  border-color: var(--pm-accent);
+  background-color: var(--pm-accent);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M1.8 5.2l2.1 2.1 4.3-4.6' fill='none' stroke='%231c1c1c' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+#umapControls label:has(input:focus-visible) {
+  outline: 2px solid var(--pm-accent);
+  outline-offset: 2px;
+}
+
+#umapControls .pm-clear-link {
+  margin-left: 2px;
+  padding: 4px 2px;
+  color: var(--pm-muted) !important;
+  text-decoration: underline !important;
+  text-decoration-color: var(--pm-line-hover) !important;
+  text-underline-offset: 3px;
+}
+
+#umapControls .pm-clear-link:hover {
+  color: var(--pm-text) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #umapControls label {
+    transition: none;
+  }
+}

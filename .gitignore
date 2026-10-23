@@ -1,0 +1,5 @@
+# Local exports for previewing; the published site is docs/.
+site-*/
+# Per-machine export cache (source paths and timestamps).
+docs/.export-manifest.json
+__pycache__/

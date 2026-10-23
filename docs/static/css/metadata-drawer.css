@@ -1,0 +1,306 @@
+/* CSS styles for the metadata drawer */
+/* ===== FILE INFO BANNER ===== */
+.filename-banner {
+  position: relative;
+  width: 100%;
+  background: rgba(0, 0, 0, 0.75);
+  color: #fff;
+  padding: 0;
+  box-sizing: border-box;
+  text-align: left;
+  border-radius: 8px 0 0 8px;
+  margin: 0;
+  order: 1;
+  pointer-events: auto;
+  overflow: hidden;
+}
+
+/* Draggable Titlebar */
+.filename-titlebar {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5em;
+  background: rgba(50, 50, 50, 0.9);
+  padding: 0.6em 1em;
+  border-bottom: 1px solid rgba(128, 128, 128, 0.3);
+  cursor: move;
+  user-select: none;
+}
+
+.filename-titlebar:hover {
+  background: rgba(60, 60, 60, 0.9);
+}
+
+.filename-banner:hover {
+  /* No hover effect on the banner itself anymore */
+}
+
+.filenameDescContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  margin-bottom: 0;
+  padding: 1em 2em;
+}
+
+.filenameRow {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.5em;
+  white-space: nowrap;
+}
+
+#descriptionText {
+  color: #ccc;
+  font-size: 1em;
+  margin: 0.5em 0;
+  max-width: 100%;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  max-height: 40vh;
+  overflow-y: auto;
+  text-align: left;
+  cursor: auto;
+}
+}
+
+#filepathText {
+  color: #ccc;
+  font-size: 0.8em;
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+  text-align: left;
+  word-break: break-word;
+  white-space: pre-line;
+  cursor: auto;
+}
+
+#filenameText {
+  display: inline-block;
+  max-width: 100%;
+  font-weight: bold;
+  font-size: 1em;
+  color: #fff700;
+  overflow-wrap: anywhere;
+  word-break: break-all;
+  white-space: normal;
+  vertical-align: middle;
+  flex: 1;
+  cursor: move;
+}
+
+.exif-metadata {
+  white-space: normal !important;
+}
+
+.exif-metadata table {
+  margin: 0 !important;
+  padding: 0 !important;
+  border-spacing: 0;
+  border-collapse: collapse;
+}
+
+.exif-metadata th,
+.exif-metadata td {
+  padding: 2px 6px !important;
+  margin: 0 !important;
+  font-size: 0.98em;
+  vertical-align: top;
+}
+
+.exif-metadata tr {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.metadata-link {
+  color: #faea0e;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 0.7em;
+}
+
+.cluster-info-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 0.9em;
+  font-weight: bold;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.cluster-info-badge:hover {
+  opacity: 0.9;
+  transform: scale(1.05);
+}
+
+.invoke-metadata,
+.invoke-tuples {
+  border-collapse: collapse;
+  border: 1px solid #bbb;
+  width: 100%;
+  margin: 0.5em 0;
+}
+
+.invoke-metadata th,
+.invoke-metadata td,
+.invoke-tuples th,
+.invoke-tuples td {
+  border: 1px solid #555;
+  padding: 6px 10px;
+}
+
+/* ===== BANNER DRAWER CONTAINER ===== */
+.banner-drawer-container {
+  position: fixed;
+  left: 0;
+  top: 120px;
+  transform: translateX(-100%);
+  width: auto;
+  max-width: 60vw;
+  z-index: 4001;
+  transition: transform 0.4s ease, top 0.2s;
+  pointer-events: auto;
+  display: flex;
+  flex-direction: row;
+}
+
+.banner-drawer-container.visible {
+  transform: translateX(0);
+}
+
+.banner-drawer-container.hidden-fullscreen {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+.banner-drawer-container:not(.visible) {
+  transform: translateX(calc(-100% + 20px));
+}
+
+.overlay-drawer {
+  position: relative;
+  width: 20px;
+  height: 100px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  order: 2;
+  display: flex;
+  align-items: center;
+}
+
+.drawer-handle {
+  width: 100%;
+  height: 100%;
+  background: rgba(209, 209, 0, 0.5);
+  clip-path: polygon(0% 0%, 80% 20%, 80% 80%, 0% 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+}
+
+.drawer-handle:hover {
+  background: rgba(255, 255, 255, 0.6);
+}
+
+/* .banner-drawer-container.visible .drawer-handle {
+  background: rgba(0, 0, 0, 0.5);
+} */
+
+.drawer-arrow {
+  transition: transform 0.3s ease;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5));
+  transform: rotate(90deg);
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  color: black;
+  fill: black;
+}
+
+.banner-drawer-container.visible .drawer-arrow {
+  transform: rotate(-90deg) translateY(-5px);
+}
+
+#copyTextBtn,
+#copyMetadataBtn {
+  background: transparent !important;
+  border: none;
+  color: #fff;
+  padding: 0.2em;
+  border-radius: 4px;
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  height: auto;
+  min-width: 24px;
+  min-height: 24px;
+  flex-shrink: 0;
+}
+
+#copyTextBtn:hover,
+#copyMetadataBtn:hover,
+.copy-icon:hover {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+#copyTextBtn svg,
+#copyMetadataBtn svg {
+  color: #fff;
+  fill: currentColor;
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+@media (max-width: 768px) {
+  #filenameBanner {
+    min-width: 180px;
+    padding: 0.5em 1em;
+    font-size: 0.95em;
+    overflow-wrap: anywhere;
+    word-break: break-all;
+  }
+
+  #descriptionText {
+    font-size: 1em;
+  }
+}
+
+@media (max-width: 480px) {
+  #filenameBanner {
+    min-width: 180px;
+    padding: 0.5em 1em;
+    font-size: 0.95em;
+  }
+
+  #descriptionText {
+    font-size: 1em;
+  }
+}
+
+.copy-icon {
+  cursor: pointer;
+  margin-left: 0.5em;
+  color: white;
+  font-size: 1em;
+  vertical-align: middle;
+  opacity: 0.7;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.copy-icon:hover {
+  opacity: 1;
+  filter: brightness(1.2);
+}

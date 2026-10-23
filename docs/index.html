@@ -1,0 +1,1210 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title id="slideshow_title">@logisticaggression</title>
+    <!-- ... (Head content remains the same) ... -->
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <link rel="icon" type="image/x-icon" href="static/icons/favicon.ico" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-3.0.1.min.js" charset="utf-8"></script>
+    <link rel="stylesheet" type="text/css" href="static/css/base.css" />
+    <link rel="stylesheet" type="text/css" href="static/css/animations.css" />
+    <link rel="stylesheet" type="text/css" href="static/css/modal-base.css" />
+    <link rel="stylesheet" type="text/css" href="static/css/spinners.css" />
+    <link rel="stylesheet" type="text/css" href="static/css/swiper.css" />
+    <link rel="stylesheet" type="text/css" href="static/css/grid-view.css" />
+    <link rel="stylesheet" type="text/css" href="static/css/control-and-search-panels.css" />
+    <link rel="stylesheet" type="text/css" href="static/css/seek-slider.css" />
+    <link rel="stylesheet" type="text/css" href="static/css/metadata-drawer.css" />
+    <link rel="stylesheet" type="text/css" href="static/css/search.css" />
+    <link rel="stylesheet" type="text/css" href="static/css/settings.css" />
+    <link rel="stylesheet" type="text/css" href="static/css/album-manager.css" />
+    <link rel="stylesheet" type="text/css" href="static/css/filetree.css" />
+    <link rel="stylesheet" type="text/css" href="static/css/delete-modal.css" />
+    <link rel="stylesheet" type="text/css" href="static/css/about.css" />
+    <link rel="stylesheet" type="text/css" href="static/css/bookmarks.css" />
+    <link rel="stylesheet" type="text/css" href="static/css/umap-floating-window.css" />
+    <link rel="stylesheet" type="text/css" href="static/css/curation.css" />
+
+    <script>
+        window.slideshowConfig = {
+            currentDelay: null,
+        mode: null,
+        highWaterMark: null,
+        album: "hanna",
+        albumLocked: true
+      };
+    </script>
+    <meta name="robots" content="noindex, nofollow" />
+    <link rel="stylesheet" href="pm-static/pm-static.css" />
+    <script src="pm-static/pm-static.js"></script>
+    <script type="module" src="static/main.js"></script>
+</head>
+
+<body>
+    <!-- Spinner animation for loading images -->
+<div id="spinner">
+  <svg width="60" height="60" viewBox="0 0 50 50">
+    <circle
+      cx="25"
+      cy="25"
+      r="20"
+      fill="none"
+      stroke="#888"
+      stroke-width="5"
+      stroke-linecap="round"
+      stroke-dasharray="31.4 31.4"
+      transform="rotate(-90 25 25)"
+    >
+      <animateTransform
+        attributeName="transform"
+        type="rotate"
+        from="0 25 25"
+        to="360 25 25"
+        dur="1s"
+        repeatCount="indefinite"
+      />
+    </circle>
+  </svg>
+</div>
+    <!-- Score display - always visible in swiper view, independent of slider -->
+<div id="fixedScoreDisplay" class="fixed-score-display" tabindex="0">
+  <span id="scoreText">score=0.000</span>
+</div>
+
+<!-- Yellow hover strip at top - always visible when slider is hidden -->
+<div id="sliderHoverStrip" class="slider-hover-strip"></div>
+
+<!-- Slider row that animates in/out -->
+<div id="scoreSliderRow" class="score-slider-row">
+  <!-- Invisible hover zone that covers slider + ticks area -->
+  <div id="sliderHoverZone" class="slider-hover-zone"></div>
+
+  <div id="sliderWithTicksContainer" class="slider-with-ticks-container">
+  
+    <input
+      type="range"
+      id="slideSeekSlider"
+      class="slide-seek-slider"
+      min="1"
+      max="1"
+      value="1"
+      tabindex="-1"
+    />
+    <div id="sliderInfoPanel" class="slider-info-panel"></div>
+    <span id="contextLabel" class="context-label"></span>
+    <div class="slider-ticks-row">
+      <div id="sliderTicks" class="slider-ticks"></div>
+    </div>
+  </div>
+</div>
+
+    <div id="singleSwiperContainer">
+        <!-- HTML template for the slideshow module -->
+<div class="swiper" id="singleSwiper">
+  <div class="swiper-wrapper" id="singleSwiperWrapper">
+    <!-- Slides will be added dynamically -->
+  </div>
+  <div class="swiper-pagination"></div>
+</div>
+        <div class="swiper-button-prev" id="singleSwiperPrevButton"></div>
+        <div class="swiper-button-next" id="singleSwiperNextButton"></div>
+    </div>
+
+    <div id="gridViewContainer">
+        <!-- HTML template for the grid view module -->
+<div class="swiper grid-mode" id="gridViewSwiper">
+  <div class="swiper-wrapper" id="gridViewSwiperWrapper">
+    <!-- Slides will be added dynamically -->
+  </div>
+</div>
+        <div class="swiper-button-prev" id="gridSwiperPrevButton"></div>
+        <div class="swiper-button-next" id="gridSwiperNextButton"></div>
+    </div>
+
+    <!-- Drawer Container for image metadata drawer -->
+<div id="bannerDrawerContainer" class="banner-drawer-container">
+  <!-- Overlay Drawer Toggle -->
+  <div id="overlayDrawer" class="overlay-drawer">
+    <div class="drawer-handle">
+      <svg class="drawer-arrow" viewBox="0 0 18 18">
+        <path d="M7 14l5-5 5 5z" fill="currentColor" />
+      </svg>
+    </div>
+  </div>
+
+  <!-- File Info Banner -->
+  <div id="filenameBanner" class="filename-banner">
+    <!-- Draggable Titlebar -->
+    <div id="filenameTitlebar" class="filename-titlebar">
+      <span id="filenameText"></span>
+      <button id="copyTextBtn" title="Copy text">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+          <path
+            d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"
+          />
+        </svg>
+      </button>
+    </div>
+    <!-- Content Area -->
+    <div class="filenameDescContainer">
+      <div id="clusterInfoContainer" style="display: none; margin-top: 0.5em;">
+        <span id="clusterInfoBadge" class="cluster-info-badge" style="cursor: pointer;"></span>
+      </div>
+      <div id="descriptionText"></div>
+      <div id="filepathText"></div>
+      <div id="metadataLinkContainer">
+        <a
+          id="metadataLink"
+          href="#"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="metadata-link"
+          >View Metadata (JSON)</a
+        >
+      </div>
+    </div>
+  </div>
+</div>
+    <div id="panelStackContainer">
+        <!-- HTML template for the search icons -- show/hide semantic map, search by image similarity, search by text -->
+<!-- Search Panel -->
+<div id="searchPanel">
+  <div class="search-panel-title">Search</div>
+  <div class="search-icons-row">
+    <div class="search-icon-container bookmark-icon-container">
+      <button id="bookmarkMenuBtn" title="Bookmarks">
+        <span id="bookmarkMenuIcon">
+          <svg
+            width="32"
+            height="32"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#fff"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+          </svg>
+        </span>
+      </button>
+      <div class="button-label">Bookmarks</div>
+    </div>
+
+    <div class="search-icon-container">
+      <button id="showUmapBtn" title="Show UMAP">
+        <span id="showUmapIcon">
+          <svg
+            width="32"
+            height="32"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#fff"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <!-- Outer circle -->
+            <circle cx="12" cy="12" r="9" />
+            <!-- Center dot -->
+            <circle cx="12" cy="12" r="2.2" fill="#fff" />
+            <!-- Rays -->
+            <line x1="12" y1="0" x2="12" y2="7" />
+            <line x1="12" y1="17" x2="12" y2="24" />
+            <line x1="0" y1="12" x2="7" y2="12" />
+            <line x1="17" y1="12" x2="24" y2="12" />
+          </svg>
+        </span>
+      </button>
+      <div class="button-label">By Map</div>
+    </div>
+
+    <div class="search-icon-container">
+      <button id="imageSearchBtn" title="Search for similar images">
+        <span id="imageSearchIcon">
+          <svg
+            width="32"
+            height="32"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#fff"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+            <circle cx="8.5" cy="8.5" r="1.5" />
+            <polyline points="21 15 16 10 5 21" />
+          </svg>
+        </span>
+      </button>
+      <div class="button-label">By Image</div>
+    </div>
+
+    <div class="search-icon-container">
+      <button id="textSearchBtn" title="Search">
+        <span id="textSearchIcon">
+          <svg
+            id="searchIcon"
+            width="32"
+            height="32"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#fff"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+          </svg>
+        </span>
+      </button>
+      <div class="button-label">By Text</div>
+    </div>
+
+    <div class="clear-search-container">
+      <button id="clearSearchBtn" title="Clear Search" style="display: none">
+        <svg
+          width="32"
+          height="32"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="#fff"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <rect x="4" y="4" width="16" height="16" rx="2" ry="2" />
+          <line x1="8" y1="8" x2="16" y2="16" />
+          <line x1="16" y1="8" x2="8" y2="16" />
+        </svg>
+      </button>
+      <div class="button-label">Clear</div>
+    </div>
+  </div>
+</div>
+        <!-- HTML template for the "control panel" icons -- settings, delete, fullscreen, play/pause, etc. -->
+
+<!-- Control Panel -->
+<div id="controlPanel">
+  <div class="control-panel-title">Control</div>
+  <div class="control-icons-row">
+    <div class="control-icon-container">
+      <button id="aboutBtn" title="About">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="#fff">
+          <circle
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="#fff"
+            stroke-width="2"
+            fill="none"
+          />
+          <text
+            x="12"
+            y="12"
+            text-anchor="middle"
+            font-size="16"
+            fill="#fff"
+            font-family="Arial"
+            dy=".3em"
+          >
+            ?
+          </text>
+        </svg>
+      </button>
+      <div class="button-label">About</div>
+    </div>
+    <div class="control-icon-container">
+      <button id="settingsBtn" title="Settings">
+        <svg
+          width="32"
+          height="32"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="#fff"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <circle cx="12" cy="12" r="3" />
+          <path
+            d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.09A1.65 1.65 0 0 0 9 3.09V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h.09a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.09a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"
+          />
+        </svg>
+      </button>
+      <div class="button-label">Settings</div>
+    </div>
+    
+    <div class="control-icon-container">
+      <button id="fullscreenBtn" title="Fullscreen">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="#fff">
+          <path
+            d="M4 4h6V2H2v8h2V4zm16 0v6h2V2h-8v2h6zm0 16h-6v2h8v-8h-2v6zM4 20v-6H2v8h8v-2H4z"
+          />
+        </svg>
+      </button>
+      <div class="button-label">Full Screen</div>
+    </div>
+    <div class="control-icon-container">
+      <button id="gridViewBtn" title="Grid View">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="#fff">
+          <rect x="3" y="3" width="7" height="7" rx="2" />
+          <rect x="14" y="3" width="7" height="7" rx="2" />
+          <rect x="3" y="14" width="7" height="7" rx="2" />
+          <rect x="14" y="14" width="7" height="7" rx="2" />
+        </svg>
+      </button>
+      <div class="button-label">Grid View</div>
+    </div>
+    <div class="control-icon-container">
+      <button id="startStopSlideshowBtn" title="Start/Pause Slideshow">
+        <span id="slideshowIcon">
+          <svg
+            id="playIcon"
+            width="32"
+            height="32"
+            viewBox="0 0 24 24"
+            fill="#fff"
+          >
+            <polygon points="5,3 19,12 5,21" />
+          </svg>
+          <svg
+            id="pauseIcon"
+            style="display: none"
+            width="32"
+            height="32"
+            viewBox="0 0 24 24"
+            fill="#fff"
+          >
+            <rect x="6" y="4" width="4" height="16" />
+            <rect x="14" y="4" width="4" height="16" />
+          </svg>
+        </span>
+      </button>
+      <div class="button-label">Slideshow</div>
+    </div>
+  </div>
+</div>
+    </div>
+    <!-- HTML template for the combined image/text search dialog -->
+<div id="textSearchPanel">
+  <button id="closeTextSearchBtn" class="modal-close" title="Close search" aria-label="Close">
+    ✖
+  </button>
+  <div class="search-controls">
+    <div class="search-input-container vertical-search-inputs">
+      <div class="search-image-column">
+        <div class="search-image-label">Image Search</div>
+        <div id="searchImageThumbArea">
+          <!-- JS will insert thumbnail or upload box here -->
+        </div>
+        <div class="search-row">
+          <label
+            id="imgPromptWeightLabel"
+            class="search-label"
+            style="visibility: hidden"
+            >Image Weight:</label
+          >
+          <div class="search-field-wrapper">
+            <div id="imgPromptWeightSlider" aria-labelledby="imgPromptWeightLabel"></div>
+          </div>
+        </div>
+      </div>
+      <div class="search-fields-column">
+        <!-- Row 1: Positive search -->
+        <label for="searchInput" class="search-label">Text Search:</label>
+        <div class="search-field-wrapper">
+          <input
+            id="searchInput"
+            type="text"
+            placeholder="Enter search terms..."
+            autocomplete="off"
+          />
+          <button id="clearTextSearchBtn" title="Clear search">&#10005;</button>
+          <div class="weight-row">
+            <label class="weight-label"
+            id="posPromptWeightLabel"
+              >Weight:</label
+            >
+            <div id="posPromptWeightSlider" aria-labelledby="posPromptWeightLabel"></div>
+          </div>
+        </div>
+        <!-- Row 2: Negative search -->
+        <label for="negativeSearchInput" class="search-label"
+          >Text to Avoid:</label
+        >
+        <div class="search-field-wrapper">
+          <input
+            id="negativeSearchInput"
+            type="text"
+            placeholder="Exclude terms..."
+            autocomplete="off"
+          />
+          <button id="clearNegativeTextSearchBtn" title="Clear exclude">
+            &#10005;
+          </button>
+          <div class="weight-row">
+            <label id="negPromptWeightLabel" class="weight-label"
+              >Weight:</label
+            >
+            <div id="negPromptWeightSlider" aria-labelledby="negPromptWeightLabel"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="search-bottom-row">
+      <span class="search-upload-hint" style="color: white; font-size: 80%">
+        Or paste, drag or
+        <a
+          href="#"
+          id="uploadImageLink"
+          class="upload-link"
+          style="font-size: inherit"
+          >upload</a
+        >
+        <input
+          type="file"
+          id="uploadImageInput"
+          accept="image/*"
+          style="display: none"
+        />
+        a search image.
+      </span>
+      <button id="doSearchBtn">Search</button>
+    </div>
+  </div>
+</div>
+    <!-- UMAP Floating Window -->
+<!-- This is referred to as the "semantic map" in the UI -->
+
+<div id="umapFloatingWindow">
+  <!-- Titlebar -->
+  <div id="umapTitlebar">
+    <span id="semanticMapTitle">Semantic Map</span>
+    <div style="display: flex; align-items: center; gap: 8px">
+      <!-- Resizing icons -->
+      <button id="umapResizeFullscreen" title="Fullscreen" class="icon-btn">
+        <svg width="24" height="24" viewBox="0 0 24 24">
+          <!-- Central point -->
+          <circle cx="12" cy="12" r="1.5" fill="#FFD600" />
+          <!-- Bright square outline -->
+          <rect
+            x="4"
+            y="4"
+            width="16"
+            height="16"
+            rx="4"
+            fill="none"
+            stroke="#D0D0D0"
+            stroke-width="1"
+          />
+          <!-- Arrows to corners -->
+          <g stroke="#FFD600" stroke-width="2.5" fill="#FFD600">
+            <!-- Top-left arrow -->
+            <line x1="12" y1="12" x2="4" y2="4" />
+            <polygon points="4,4 7,4 4,7" />
+            <!-- Top-right arrow -->
+            <line x1="12" y1="12" x2="20" y2="4" />
+            <polygon points="20,4 17,4 20,7" />
+            <!-- Bottom-left arrow -->
+            <line x1="12" y1="12" x2="4" y2="20" />
+            <polygon points="4,20 7,20 4,17" />
+            <!-- Bottom-right arrow -->
+            <line x1="12" y1="12" x2="20" y2="20" />
+            <polygon points="20,20 17,20 20,17" />
+          </g>
+        </svg>
+      </button>
+
+      <button id="umapResizeBig" title="Large" class="icon-btn">
+        <svg width="28" height="28" viewBox="0 0 28 28">
+          <rect
+            x="4"
+            y="4"
+            width="20"
+            height="20"
+            rx="4"
+            fill="#fff"
+            opacity="0.8"
+          />
+        </svg>
+      </button>
+      <button id="umapResizeMedium" title="Medium" class="icon-btn">
+        <svg width="20" height="20" viewBox="0 0 20 20">
+          <rect
+            x="3"
+            y="3"
+            width="14"
+            height="14"
+            rx="3"
+            fill="#fff"
+            opacity="0.8"
+          />
+        </svg>
+      </button>
+      <button id="umapResizeSmall" title="Small" class="icon-btn">
+        <svg width="14" height="14" viewBox="0 0 14 14">
+          <rect
+            x="2"
+            y="2"
+            width="10"
+            height="10"
+            rx="2"
+            fill="#fff"
+            opacity="0.8"
+          />
+        </svg>
+      </button>
+      <button id="umapResizeShaded" title="Shaded" class="icon-btn">
+        <svg width="18" height="10" viewBox="0 0 18 10">
+          <rect
+            x="2"
+            y="2"
+            width="14"
+            height="6"
+            rx="2"
+            fill="#fff"
+            opacity="0.8"
+          />
+        </svg>
+      </button>
+      <button
+        id="umapCloseBtn"
+        style="
+          background: none;
+          border: none;
+          color: #fff;
+          font-size: 1.5em;
+          cursor: pointer;
+          margin-left: 8px;
+        "
+        title="Close"
+      >
+        &times;
+      </button>
+    </div>
+  </div>
+  <!-- Spinner (always visible during loading) -->
+  <div
+    id="umapSpinner"
+    style="
+      display: none;
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 1000;
+    "
+  >
+    <div class="umap-spinner"></div>
+  </div>
+
+  <!-- All other content hidden until plot is ready -->
+  <div id="umapContent" style="display: none">
+    <!-- Plotly Plot -->
+    <div id="umapPlot"></div>
+
+    <div id="umapControls">
+      <!-- Controls Row: EPS spinner and Color Mode -->
+      <div
+        style="
+          display: flex;
+          flex-direction: row;
+          gap: 24px;
+          justify-content: center;
+          align-items: flex-start;
+          margin-top: 4px;
+        "
+      >
+        <!-- EPS Spinner Container -->
+        <div id="umapEpsContainer" style="display: none; padding: 0px">
+          <label for="umapEpsSpinner">Cluster Strength</label>
+          <input
+            type="number"
+            id="umapEpsSpinner"
+            min="0.01"
+            max="1.0"
+            step="0.01"
+            value="0.1"
+            style="width: 60px"
+          />
+          
+          <!-- Click Behavior Radio Buttons -->
+          <div id="umapClickBehaviorContainer" style="margin-top: 12px; display: flex; flex-direction: column; gap: 4px;">
+            <label style="display: flex; align-items: center; gap: 6px; font-size: 0.9em;">
+              <input
+                type="radio"
+                name="umapClickBehavior"
+                id="umapClickSelectsClusterRadio"
+                value="cluster"
+                checked
+              />
+              Click selects cluster
+            </label>
+            <label style="display: flex; align-items: center; gap: 6px; font-size: 0.9em;">
+              <input
+                type="radio"
+                name="umapClickBehavior"
+                id="umapClickSelectsImageRadio"
+                value="image"
+              />
+              Click selects image
+            </label>
+          </div>
+        </div>
+
+        <!-- Colorization Mode Controls (two columns) -->
+        <div
+          id="umapColorModeContainer"
+          style="
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+          "
+        >
+          <label style="display: flex; align-items: center; gap: 8px">
+            <input
+              type="checkbox"
+              id="umapShowLandmarks"
+              style="margin-right: 6px"
+            />
+            Show landmarks
+          </label>
+          <label id="umapExitFullscreenLabel" style="display: flex; align-items: center; gap: 8px">
+            <input
+              type="checkbox"
+              id="umapExitFullscreenOnSelection"
+              checked
+              style="margin-right: 6px"
+            />
+            Exit fullscreen on selection
+          </label>
+          <label style="display: flex; align-items: center; gap: 8px">
+            <input
+              type="checkbox"
+              id="umapShowHoverThumbnails"
+              checked
+              style="margin-right: 6px"
+            />
+            Show hover thumbnails
+          </label>
+          <label style="display: flex; align-items: center; gap: 8px">
+            <input
+              type="checkbox"
+              id="umapHighlightSelection"
+              style="margin-right: 6px"
+            />
+            <span>Highlight selection (<a id="umapClearSelectionLink" href="#" style="color:#4a9eff;text-decoration:none;">clear</a>)</span>
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    <!-- Settings Overlay Modal -->
+<!-- These are the settings triggered by the gear icon in the control panel -->
+
+<div id="settingsOverlay" class="modal-overlay">
+  <div class="modal-content settings-modal">
+    <button id="closeSettingsBtn" class="modal-close" title="Close settings">
+      ✖
+    </button>
+
+    <div class="settings-header">
+      <span id="slideshowSettingsLabel">PhotoMapAI</span>
+      <span
+        id="settingsVersion"
+        style="font-size: 0.9em; color: #888; margin-left: 8px"
+      >
+        v1.0.1
+      </span>
+    </div>
+
+    <div class="settings-main">
+      <!-- Left column: Slower/Faster/Interval -->
+      <div class="delay-controls">
+        <div id="delayLabel">Image Change Interval</div>
+
+        <div class="delay-control-buttons">
+          <button id="fasterBtn" title="Faster">&#9664;</button>
+          <span id="delayValue">10</span>
+          <button id="slowerBtn" title="Slower">&#9654;</button>
+        </div>
+      </div>
+
+      <!-- Right column: Mode controls -->
+      <div id="modeControls">
+        <div id="modeLabel">Image Slideshow Mode:</div>
+
+        <div id="modeRadioGroup">
+          <label
+            ><input
+              type="radio"
+              id="modeChronological"
+              name="mode"
+              value="chronological"
+              checked
+            />
+            Sequential</label
+          >
+          <label
+            ><input type="radio" id="modeRandom" name="mode" value="random" />
+            Shuffle</label
+          >
+        </div>
+      </div>
+    </div>
+
+    <!-- Settings rows -->
+    <div class="setting-row">
+      <label for="gridThumbSizeFactor">Grid thumbnail size factor:</label>
+      <div style="display:flex; align-items:center; gap:6px;">
+        <input
+          type="number"
+          id="gridThumbSizeFactor"
+          min="0.5"
+          max="2.0"
+          step="0.05"
+          value="1.0"
+          style="width: 70px"
+        />
+        <button
+          id="gridThumbSizeFactorReset"
+          class="reset-default-btn"
+          title="Reset to default (1.0)"
+          aria-label="Reset Grid thumbnail size factor to default"
+          style="background:none;border:none;padding:0;cursor:pointer;line-height:1;"
+        >
+          <span style="color:#FFC107; font-size:16px;">↩</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="setting-row">
+      <label for="minSearchScore">Minimum search score:</label>
+      <div style="display:flex; align-items:center; gap:6px;">
+        <input
+          type="number"
+          id="minSearchScore"
+          min="0.0"
+          max="1.0"
+          step="0.01"
+          value="0.2"
+          style="width: 70px"
+        />
+        <button
+          id="minSearchScoreReset"
+          class="reset-default-btn"
+          title="Reset to default (0.20)"
+          aria-label="Reset Minimum search score to default"
+          style="background:none;border:none;padding:0;cursor:pointer;line-height:1;"
+        >
+          <span style="color:#FFC107; font-size:16px;">↩</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Maximum number of search results -->
+    <div class="setting-row">
+      <label for="maxSearchResults">Maximum # of search results:</label>
+      <div style="display:flex; align-items:center; gap:6px;">
+        <input
+          type="number"
+          id="maxSearchResults"
+          min="50"
+          max="500"
+          step="10"
+          value="100"
+          style="width: 70px"
+        />
+        <button
+          id="maxSearchResultsReset"
+          class="reset-default-btn"
+          title="Reset to default (100)"
+          aria-label="Reset Maximum # of search results to default"
+          style="background:none;border:none;padding:0;cursor:pointer;line-height:1;"
+        >
+          <span style="color:#FFC107; font-size:16px;">↩</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Row for control panel text visibility -->
+    <div class="setting-row">
+      <label for="showControlPanelTextCheckbox">Show Button Labels:</label>
+      <input type="checkbox" id="showControlPanelTextCheckbox" />
+    </div>
+
+    
+
+    <!-- Input for the LocationIQ API Key -->
+    
+
+    <!-- Album selection row -->
+    
+  </div>
+</div>
+    <!-- Album Management Overlay Modal -->
+<div id="albumManagementOverlay" class="modal-overlay album-management">
+  <div class="modal-content album-management-modal" id="albumManagementContent">
+    <!-- Header with Add Album Button (fixed) -->
+    <div class="album-header">
+      <button id="backToSettingsBtn" class="back-button" title="Back to Settings">
+        ← Settings
+      </button>
+      <h2>Album Management</h2>
+      <div class="header-buttons">
+        <button id="showAddAlbumBtn" class="btn-primary">+ Add Album</button>
+        <button id="closeAlbumManagementBtn" class="modal-close" title="Close">
+          ✖
+        </button>
+      </div>
+    </div>
+
+    <!-- Add New Album Section (fixed, if desired) -->
+    <div id="addAlbumSection" class="add-album-section">
+      <div class="section-header">
+        <h3>Add New Album</h3>
+        <button id="cancelAddAlbumBtn" class="cancel-btn" title="Cancel">
+          ✖
+        </button>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Album Key</label>
+          <input
+            id="newAlbumKey"
+            type="text"
+            placeholder="e.g., vacation_2024"
+          />
+        </div>
+        <div class="form-group">
+          <label>Display Name</label>
+          <input
+            id="newAlbumName"
+            type="text"
+            placeholder="e.g., Vacation 2024"
+          />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Description</label>
+        <input
+          id="newAlbumDescription"
+          type="text"
+          placeholder="Optional description"
+        />
+      </div>
+
+      <div class="form-group">
+        <label>Image Folder(s)</label>
+        <div id="newAlbumPathsContainer" class="edit-album-paths-container"></div>
+      </div>
+
+      <div class="form-buttons">
+        <button id="addAlbumBtn" class="btn-primary">Add Album</button>
+        <button id="cancelAddAlbumBtn2" class="btn-secondary">Cancel</button>
+      </div>
+    </div>
+
+    <!-- Scrollable Albums Section -->
+    <div id="albumsScrollContainer" style="max-height: 60vh; overflow-y: auto">
+      <div id="existingAlbumsSection">
+        <h3>Albums</h3>
+        <div id="albumsList">
+          <!-- Albums will be populated here -->
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Album Card Template -->
+<template id="albumCardTemplate">
+  <div class="album-card">
+    <div class="album-info">
+      <div class="album-details">
+        <div class="album-text">
+          <h4 class="album-name"></h4>
+          <div class="album-key"></div>
+          <div class="album-description"></div>
+          <div class="album-paths"></div>
+        </div>
+        <div class="indexing-section">
+          <!-- Index Status and Button -->
+          <div class="index-controls">
+            <div class="index-status">Ready to index</div>
+            <button class="create-index-btn btn-index">Update Index</button>
+            <button class="cancel-index-btn btn-cancel">Cancel</button>
+          </div>
+          <!-- Progress Container -->
+          <div class="progress-container">
+            <div class="progress-bar-wrapper">
+              <div class="progress-bar-track">
+                <div class="progress-bar"></div>
+                <div class="progress-bar-shimmer"></div>
+              </div>
+              <div class="progress-text">0%</div>
+            </div>
+            <div class="estimated-time"></div>
+          </div>
+        </div>
+        <div class="action-buttons vertical">
+          <button class="edit-album-btn btn-edit">Edit</button>
+          <button class="delete-album-btn btn-delete">Delete</button>
+        </div>
+      </div>
+    </div>
+    <!-- Edit Form -->
+    <div class="edit-form">
+      <h4 class="edit-album-title">Edit Album</h4>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Display Name</label>
+          <input class="edit-album-name" type="text" />
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <input class="edit-album-description" type="text" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Image Folder(s)</label>
+        <div class="edit-album-paths-container"></div>
+      </div>
+      <div class="form-buttons">
+        <button class="save-album-btn btn-primary">Save Changes</button>
+        <button class="cancel-edit-btn btn-secondary">Cancel</button>
+      </div>
+    </div>
+  </div>
+</template>
+    <!-- This is the modal that shows the JSON dump of image metadata. -->
+<!-- Metadata Modal -->
+<div id="metadataModal" class="modal-overlay">
+  <div class="modal-content">
+    <button id="closeMetadataModalBtn" class="modal-close" title="Close">
+      ✖
+    </button>
+    <div style="display: flex; align-items: center; gap: 0.5em;">
+      <h3 style="color: #faea0e; margin-top: 0; margin-bottom: 0;">Image Metadata (JSON)</h3>
+      <button id="copyMetadataBtn" title="Copy metadata" style="background: none; border: none; cursor: pointer; padding: 0;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+          <path
+            d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"
+          />
+        </svg>
+      </button>
+    </div>
+    <textarea
+      id="metadataTextArea"
+      readonly
+      style="
+        width: 100%;
+        height: 300px;
+        font-family: monospace;
+        font-size: 1em;
+        padding: 1em;
+        border-radius: 8px;
+        background: #222;
+        color: #fff;
+        border: 1px solid #888;
+      "
+    ></textarea>
+  </div>
+</div>
+    <div id="deleteConfirmModal" class="modal" style="display:none;">
+  <div class="modal-content">
+    <p id="deleteConfirmText"></p>
+    <label style="display: flex; align-items: center; gap: 8px; margin-top: 12px;">
+      <input type="checkbox" id="deleteDontAskAgain" />
+      Don't ask again
+    </label>
+    <div style="margin-top: 16px; display: flex; gap: 12px; justify-content: flex-end;">
+      <button id="deleteCancelBtn">Cancel</button>
+      <button id="deleteConfirmBtn">Delete</button>
+    </div>
+  </div>
+</div>
+    <div id="confirmModal" class="modal" style="display:none;">
+  <div class="modal-content">
+    <p id="confirmText"></p>
+    <div style="margin-top: 16px; display: flex; gap: 12px; justify-content: flex-end;">
+      <button id="confirmCancelBtn">Cancel</button>
+      <button id="confirmOkBtn">OK</button>
+    </div>
+  </div>
+</div>
+    <div id="aboutModal" class="modal-overlay" style="display:none;">
+  <div class="modal-content about-modal">
+    <button id="closeAboutBtn" class="modal-close" title="Close">×</button>
+    <div class="about-modal-header">
+      <h2>PhotoMapAI</h2>
+      <span id="aboutVersion">v1.0.1</span>
+    </div>
+    <p class="about-author">
+      Author: <a href="mailto:lincoln.stein@gmail.com">Lincoln Stein &lt;lincoln.stein@gmail.com&gt;</a>
+    </p>
+    <div class="about-links-row">
+      <a href="https://lstein.github.io/PhotoMapAI/" target="_blank" style="display: flex; align-items: center;">
+        <svg width="24" height="24" viewBox="0 0 24 24" style="margin-right:6px;" fill="#FFD600" xmlns="http://www.w3.org/2000/svg">
+          <rect x="4" y="3" width="16" height="18" rx="2" stroke="#FFD600" stroke-width="2" fill="none"/>
+          <rect x="7" y="6" width="10" height="2" rx="1" fill="#FFD600"/>
+          <rect x="7" y="10" width="10" height="2" rx="1" fill="#FFD600"/>
+          <rect x="7" y="14" width="7" height="2" rx="1" fill="#FFD600"/>
+        </svg>
+        Documentation
+      </a>
+      <a href="https://github.com/lstein/PhotoMapAI" target="_blank" title="GitHub">
+        <svg width="32" height="32" viewBox="0 0 24 24">
+          <path d="M12 2C6.477 2 2 6.484 2 12.012c0 4.418 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.009-.868-.013-1.703-2.782.605-3.369-1.342-3.369-1.342-.454-1.157-1.11-1.465-1.11-1.465-.908-.62.069-.608.069-.608 1.004.07 1.532 1.032 1.532 1.032.892 1.53 2.341 1.088 2.91.832.091-.646.35-1.088.636-1.339-2.221-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.025A9.564 9.564 0 0 1 12 6.844c.85.004 1.705.115 2.504.338 1.909-1.295 2.748-1.025 2.748-1.025.546 1.378.202 2.397.1 2.65.64.7 1.028 1.595 1.028 2.688 0 3.847-2.337 4.695-4.566 4.944.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.749 0 .267.18.578.688.48C19.138 20.175 22 16.427 22 12.012 22 6.484 17.523 2 12 2z"/>
+        </svg>
+        Home Page
+      </a>
+    </div>
+  </div>
+</div>
+
+
+
+    <!-- Curation / LoRA Training Panel -->
+<div id="curationPanel" class="curation-panel hidden">
+    <div class="curation-header">
+        <h3>Dataset Curator</h3>
+        <button id="curationCloseBtn" class="close-icon">&times;</button>
+    </div>
+
+    <!-- Progress Bar (hidden by default) -->
+    <div id="curationProgressBar" style="display: none; height: 4px; background: #333; overflow: hidden;">
+        <div id="curationProgressFill" style="height: 100%; width: 0%; background: linear-gradient(90deg, #ffd700 0%, #ffffff 50%, #ffd700 100%); transition: width 0.3s ease;"></div>
+    </div>
+
+    <div class="curation-body">
+        <!-- Count and Iterations -->
+        <div class="control-group">
+            <div style="display:flex; gap:10px;">
+                <div style="flex:2">
+                    <label>Target Count</label>
+                    <input type="number" id="curationNumber" value="80" min="10" max="1000" style="width:100%">
+                </div>
+                <div style="flex:1">
+                    <label>Iterations</label>
+                    <input type="number" id="curationIterations" value="20" min="1" max="30" style="width:100%">
+                </div>
+            </div>
+            <input type="range" id="curationSlider" min="10" max="1000" value="80" step="10"
+                style="margin-top:5px; width:100%">
+        </div>
+
+        <!-- Algorithm Selection -->
+        <div class="control-group">
+            <label style="display: block; font-size: 11px; color: #aaa; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">Algorithm</label>
+            <div style="display: flex; gap: 15px;">
+                <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                    <input type="radio" name="curationMethod" id="methodFps" value="fps" checked style="cursor: pointer;">
+                    <span style="font-size: 12px;">Diversity (FPS)</span>
+                </label>
+                <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                    <input type="radio" name="curationMethod" id="methodKmeans" value="kmeans" style="cursor: pointer;">
+                    <span style="font-size: 12px;">Blocks (K-Means)</span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Legend -->
+        <div style="display:flex; justify-content:space-between; margin-bottom:10px; padding:0 5px;">
+            <div style="display:flex; align-items:center; gap:3px;">
+                <div style="width:8px; height:8px; background:#ff00ff; border-radius:50%;"></div>
+                <span style="font-size:9px; color:#aaa;">&gt;90%</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:3px;">
+                <div style="width:8px; height:8px; background:#00ffff; border-radius:50%;"></div>
+                <span style="font-size:9px; color:#aaa;">&gt;70%</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:3px;">
+                <div style="width:8px; height:8px; background:#00ff00; border-radius:50%;"></div>
+                <span style="font-size:9px; color:#aaa;">&lt;70%</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:3px;">
+                <div style="width:8px; height:8px; background:#ff0000; border-radius:50%;"></div>
+                <span style="font-size:9px; color:#aaa;">Excluded</span>
+            </div>
+        </div>
+
+        <!-- Main Actions -->
+        <div class="action-row" style="display: flex; gap: 5px; margin-bottom: 15px;">
+            <button id="curationRunBtn" class="btn-primary" style="flex: 2;">Select Images</button>
+            <button id="curationClearBtn" class="btn-secondary" style="flex: 1; background: #444;">Clear</button>
+        </div>
+
+        <hr style="border-color: #444; margin: 10px 0;">
+
+        <!-- Refinement / Exclusion -->
+        <div class="control-group"
+            style="background: #2a2a2a; padding: 8px; border-radius: 4px; border: 1px solid #444;">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:5px;">
+                <label style="color:#aaa; font-size:10px; font-weight:bold;">Manual Refinement</label>
+                <span id="lockCountDisplay" style="color:#ff8888; font-size:10px;">0 Excluded</span>
+            </div>
+
+            <!-- Threshold Exclusion -->
+            <div style="display:flex; gap:5px; margin-bottom:5px; align-items:center;">
+                <label style="font-size:10px; color:#aaa;">Exclude &gt;</label>
+                <input type="number" id="lockThresholdInput" value="90" min="1" max="100"
+                    style="width:40px; padding:2px; height:20px; font-size:10px;">
+                <label style="font-size:10px; color:#aaa;">%</label>
+                <button id="lockThresholdBtn" class="btn-secondary"
+                    style="flex:1; background: #d9534f; color:white; font-size:10px; height:24px; line-height:10px;">
+                    Exclude Matches
+                </button>
+            </div>
+
+            <div style="display:flex; gap:5px; margin-bottom:5px;">
+                <button id="toggleLockModeBtn" class="btn-secondary"
+                    style="flex:1; background: #444; font-size:10px;">Click-to-Exclude</button>
+
+                <button id="unlockOutliersBtn" class="btn-secondary"
+                    style="flex:1; background: #555; font-size:10px;">Clear Exclusions</button>
+            </div>
+        </div>
+
+        <hr style="border-color: #444; margin: 10px 0;">
+
+        <!-- Export -->
+        <div class="control-group">
+            <label>Export Path:</label>
+            <div style="display: flex; gap: 5px; align-items: center;">
+                <input type="text" id="curationExportPath" placeholder="Select export folder" style="flex: 1;">
+                <button id="curationBrowseBtn" class="btn-secondary" style="width: 40px; padding: 8px; flex-shrink: 0;" title="Browse for folder">
+                    📁
+                </button>
+            </div>
+        </div>
+
+        <div class="action-row" style="display:flex; gap:5px;">
+            <button id="curationExportBtn" class="btn-secondary" style="flex:2;" disabled>Export Dataset</button>
+            <button id="curationCsvBtn" class="btn-secondary" style="flex:1;" disabled
+                title="Download Analysis CSV">
+                📥 CSV
+            </button>
+            <button id="curationSetFavoritesBtn" class="btn-secondary" style="flex:1;" disabled title="Set current selection as Favorites">
+                ⭐
+            </button>
+        </div>
+
+        <div id="curationStatus" class="status-text"></div>
+    </div>
+</div>
+    
+
+</body>
+
+</html>
