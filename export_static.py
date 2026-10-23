@@ -3,11 +3,11 @@
 
 Run it with PhotoMap's own Python, so it can reuse PhotoMap's index code:
 
-    ~/photomap/bin/python ~/Downloads/photomap-static/export_static.py --album hanna
+    ~/photomap/bin/python export_static.py --album hanna --out docs --max-size 1080 --quality 80
 
 Preview the result (any plain static file server works):
 
-    python3 -m http.server -d ~/Downloads/photomap-static/site-hanna 8000
+    python3 -m http.server -d docs 8000
     # then open http://localhost:8000
 
 Re-run it after the album's index changes. Unchanged photos are skipped.

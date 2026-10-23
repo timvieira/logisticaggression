@@ -16,7 +16,7 @@ uploaded photos), all running in the browser. No server is needed.
 ## Update the site
 
 1. Add the new photos to the PhotoMap album (for Instagram exports:
-   `~/Downloads/photo-explorer/merge_instagram_export.py EXPORT.zip`).
+   `~/photomap/bin/python ../tools/merge_instagram_export.py EXPORT.zip`).
 2. Rebuild `docs/`. Only new or changed photos are processed:
 
        ~/photomap/bin/python export_static.py --album hanna --out docs --max-size 1080 --quality 80
