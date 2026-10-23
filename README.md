@@ -12,6 +12,8 @@ uploaded photos), all running in the browser. No server is needed.
 - `docs/`: the built site, served by GitHub Pages.
 - `export_static.py`: builds `docs/` from the PhotoMap album.
 - `shim/`: the browser code that stands in for PhotoMap's server.
+- `tests/`: browser tests (smoke test, comparison with PhotoMap, screenshots).
+- `DEVELOPING.md`: how it all works, how to test it, and known traps.
 
 ## Update the site
 
@@ -21,7 +23,9 @@ uploaded photos), all running in the browser. No server is needed.
 
        ~/photomap/bin/python export_static.py --album hanna --out docs --max-size 1080 --quality 80
 
-3. Commit and push. GitHub Pages publishes the new version within a few
+3. Check it: start the preview (below), then
+   `cd tests && npm install && node smoke.mjs`.
+4. Commit and push. GitHub Pages publishes the new version within a few
    minutes:
 
        git add -A docs && git commit -m "Update site" && git push

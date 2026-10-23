@@ -3,3 +3,7 @@ site-*/
 # Per-machine export cache (source paths and timestamps).
 docs/.export-manifest.json
 __pycache__/
+# Test tooling (see "Tests" in DEVELOPING.md)
+tests/node_modules/
+tests/.chrome-profile/
+tests/screens/

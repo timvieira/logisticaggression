@@ -1,0 +1,14 @@
+{
+  "name": "logisticaggression-tests",
+  "private": true,
+  "type": "module",
+  "description": "Browser tests for the static PhotoMap site (headless Chrome via puppeteer-core).",
+  "scripts": {
+    "smoke": "node smoke.mjs",
+    "screens": "node screens.mjs",
+    "parity": "node parity.mjs"
+  },
+  "dependencies": {
+    "puppeteer-core": "24.43.1"
+  }
+}
