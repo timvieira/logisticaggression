@@ -1,41 +1,326 @@
-/* pm-static.css: additions for the static copy of PhotoMap. */
+/* pm-static.css: the look of the static PhotoMap site.
 
-/* Progress message while the CLIP search model downloads. */
-.pm-static-toast {
-  position: fixed;
-  left: 50%;
-  top: 16px;
-  transform: translateX(-50%);
-  z-index: 100000;
-  max-width: calc(100vw - 32px);
-  padding: 10px 16px;
-  border-radius: 8px;
-  background: rgba(20, 20, 20, 0.92);
-  color: #f2f2f2;
-  font: 14px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
-  pointer-events: none;
+   Drawn from a print Hanna likes: translucent yellow, pink and blue planes
+   that darken where they overlap, around a white middle, with one line of
+   small serif type. Here the slideshow is the white middle (paper), the
+   planes sit behind it at the window edges, and everything that floats
+   (map, panels, dialogs) is dark ink. PhotoMap sets many styles inline,
+   hence the !important. */
+
+:root {
+  --pm-paper: #efefec;
+  --pm-paper-2: #e2e2de;
+  --pm-ink: #22212a;
+  --pm-ink-2: #2f2e38;
+  --pm-ink-line: rgba(255, 255, 255, 0.12);
+  --pm-ink-line-2: rgba(255, 255, 255, 0.28);
+  --pm-on-ink: #eeeef0;
+  --pm-on-ink-muted: #a9a7b4;
+  --pm-lemon: #f5e45a;
+  --pm-rose: #f09cbe;
+  --pm-sky: #4aa6e2;
+  --pm-violet: #5c4e95;
+  --pm-ember: #f19e6c;
+  --pm-sea: #3c9a9d;
+  --pm-serif: "Crimson Pro", "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  --slider-progress-color: var(--pm-sky);
+  --slider-remaining-color: rgba(34, 33, 42, 0.14);
 }
 
-.pm-static-toast-error {
-  background: rgba(140, 30, 30, 0.95);
+/* The paper is on html; body stays clear so the planes (z-index -1) show. */
+html {
+  background: var(--pm-paper) !important;
+}
+
+html,
+body {
+  font-family: var(--pm-serif) !important;
+  font-variant-numeric: lining-nums;
+}
+
+body {
+  background: transparent !important;
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
 }
 
 /* ------------------------------------------------------------------
-   Semantic map controls: one compact row under the map.
-   PhotoMap lays these out with inline styles, hence the !important.
-   The yellow accent is PhotoMap's own (active buttons, stars).
+   The stage: paper, with the planes behind the photos.
+   ------------------------------------------------------------------ */
+#pmPlanes {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+
+#pmPlanes svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+#pmPlanes polygon {
+  mix-blend-mode: multiply;
+}
+
+#pmPlanes .p-lemon { fill: var(--pm-lemon); opacity: 0.92; }
+#pmPlanes .p-ember { fill: var(--pm-ember); opacity: 0.72; }
+#pmPlanes .p-sea { fill: var(--pm-sea); opacity: 0.78; }
+#pmPlanes .p-sky { fill: var(--pm-sky); opacity: 0.85; }
+#pmPlanes .p-violet { fill: var(--pm-violet); opacity: 0.8; }
+#pmPlanes .p-ink { fill: var(--pm-ink); opacity: 0.86; }
+#pmPlanes .p-fade { opacity: 0.9; }
+
+#singleSwiper,
+#singleSwiper .swiper-slide,
+#singleSwiper .swiper-slide img,
+#singleSwiper .swiper-zoom-container img {
+  background: transparent !important;
+}
+
+/* Each photo sits on the paper like a print. The image box fills the window
+   and letterboxes the photo, so the shadow has to follow the photo itself. */
+#singleSwiper .swiper-slide img {
+  filter: drop-shadow(0 1px 1.5px rgba(34, 33, 42, 0.28)) drop-shadow(0 14px 30px rgba(34, 33, 42, 0.16));
+}
+
+/* Arrows on small paper discs, so they read over planes and photos alike. */
+.swiper-button-next,
+.swiper-button-prev {
+  --swiper-navigation-color: var(--pm-ink);
+  width: 40px !important;
+  height: 40px !important;
+  margin-top: -20px !important;
+  border-radius: 50%;
+  background: rgba(239, 239, 236, 0.86);
+  box-shadow: 0 3px 12px rgba(34, 33, 42, 0.2);
+  font-size: 16px !important;
+  opacity: 0.7 !important;
+}
+
+.swiper-button-next:hover,
+.swiper-button-prev:hover {
+  opacity: 1 !important;
+}
+
+.swiper-button-next::after,
+.swiper-button-prev::after {
+  color: var(--pm-ink) !important;
+  -webkit-text-stroke: 0 !important;
+  text-shadow: none !important;
+  font-size: 16px !important;
+  font-weight: 700 !important;
+}
+
+.swiper-button-prev::after { margin-right: 2px; }
+.swiper-button-next::after { margin-left: 2px; }
+
+/* Over the fullscreen map the arrows still step through photos (the white
+   marker follows), but quietly, in the map's own ink. */
+body:has(#umapFloatingWindow[style*="display: block"] #umapResizeFullscreen.active) .swiper-button-next,
+body:has(#umapFloatingWindow[style*="display: block"] #umapResizeFullscreen.active) .swiper-button-prev {
+  background: rgba(255, 255, 255, 0.07);
+  box-shadow: none;
+  opacity: 0.6 !important;
+}
+
+body:has(#umapFloatingWindow[style*="display: block"] #umapResizeFullscreen.active) .swiper-button-next::after,
+body:has(#umapFloatingWindow[style*="display: block"] #umapResizeFullscreen.active) .swiper-button-prev::after {
+  color: var(--pm-on-ink) !important;
+}
+
+.swiper-pagination {
+  background: var(--pm-ink) !important;
+  box-shadow: 0 6px 18px rgba(34, 33, 42, 0.25) !important;
+}
+
+.swiper-pagination-bullet {
+  background: rgba(238, 238, 240, 0.55) !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+.swiper-pagination-bullet-active {
+  background: var(--pm-lemon) !important;
+}
+
+/* Score and position, top left (colors are set by PhotoMap, by cluster). */
+.fixed-score-display {
+  font-family: var(--pm-serif) !important;
+  font-size: 15px !important;
+  font-variant-numeric: lining-nums tabular-nums;
+  border-radius: 9px !important;
+  box-shadow: 0 4px 14px rgba(34, 33, 42, 0.18) !important;
+}
+
+/* ------------------------------------------------------------------
+   Control and Search panels: two slim ink strips in the bottom corners.
+   ------------------------------------------------------------------ */
+#controlPanel,
+#searchPanel {
+  bottom: 12px !important;
+  gap: 0 !important;
+  padding: 5px 8px 4px !important;
+  border: 1px solid var(--pm-ink-line);
+  border-radius: 14px !important;
+  background: rgba(34, 33, 42, 0.9) !important;
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 24px rgba(34, 33, 42, 0.28) !important;
+}
+
+#controlPanel { left: 12px !important; }
+#searchPanel { right: 12px !important; }
+
+.control-panel-title,
+.search-panel-title {
+  display: none !important;
+}
+
+.control-icons-row,
+.search-icons-row {
+  gap: 6px !important;
+  align-items: flex-start !important;
+}
+
+.control-icon-container,
+.search-icon-container {
+  min-width: 52px;
+  gap: 1px !important;
+}
+
+#controlPanel button,
+#searchPanel button {
+  width: 36px !important;
+  height: 28px !important;
+  min-width: 36px !important;
+  min-height: 28px !important;
+  border-radius: 8px !important;
+  opacity: 0.8 !important;
+  transition: opacity 0.15s, background-color 0.15s;
+}
+
+#controlPanel button:hover,
+#searchPanel button:hover {
+  opacity: 1 !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+#controlPanel svg,
+#searchPanel svg {
+  width: 22px !important;
+  height: 22px !important;
+}
+
+#controlPanel .button-label,
+#searchPanel .button-label {
+  color: var(--pm-on-ink-muted) !important;
+  opacity: 1 !important;
+  font-size: 13px !important;
+  line-height: 1.05 !important;
+  white-space: nowrap;
+}
+
+/* PhotoMap's "this mode is on" badge, made small. */
+.checkmark-overlay svg {
+  width: 13px !important;
+  height: 13px !important;
+  top: -1px !important;
+  left: auto !important;
+  right: -1px;
+}
+
+.checkmark-overlay circle {
+  fill: var(--pm-lemon) !important;
+  opacity: 1 !important;
+}
+
+.checkmark-overlay polyline {
+  stroke: var(--pm-ink) !important;
+}
+
+#searchPanel.drag-over,
+#searchPanel.dragover {
+  border: 1px dashed var(--pm-lemon) !important;
+  box-shadow: 0 0 0 3px rgba(245, 228, 90, 0.25) !important;
+}
+
+/* ------------------------------------------------------------------
+   Semantic map: an ink slab, colored by cluster.
+   ------------------------------------------------------------------ */
+/* PhotoMap makes the smaller map sizes see-through, which turns muddy on
+   paper; keep the slab solid. */
+#umapFloatingWindow {
+  opacity: 1 !important;
+  background: var(--pm-ink) !important;
+  color: var(--pm-on-ink);
+  border-radius: 14px;
+  box-shadow: 0 20px 50px rgba(34, 33, 42, 0.4);
+  padding-bottom: 8px !important;
+}
+
+#umapTitlebar {
+  background: transparent !important;
+  padding: 4px 6px 2px 12px !important;
+  font: 500 19px/1.2 var(--pm-serif) !important;
+  letter-spacing: 0.005em;
+}
+
+#umapTitlebar .icon-btn {
+  border: 0 !important;
+  border-radius: 9px !important;
+  margin: 0 1px !important;
+}
+
+#umapTitlebar .icon-btn:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+#umapTitlebar .icon-btn.active {
+  box-shadow: inset 0 0 0 1.5px var(--pm-lemon) !important;
+  background: rgba(245, 228, 90, 0.12) !important;
+}
+
+.umap-thumbnail {
+  border: 0 !important;
+  border-radius: 12px !important;
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.45) !important;
+  font-family: var(--pm-serif);
+}
+
+.umap-thumbnail-filename,
+.umap-thumbnail-cluster {
+  text-shadow: none !important;
+}
+
+.umap-thumbnail-cluster {
+  background: rgba(34, 33, 42, 0.12) !important;
+}
+
+#umapSpinner .umap-spinner {
+  border-color: rgba(255, 255, 255, 0.15) !important;
+  border-top-color: var(--pm-lemon) !important;
+}
+
+/* ------------------------------------------------------------------
+   Map controls: one compact row under the map.
    ------------------------------------------------------------------ */
 #umapControls {
-  --pm-text: #e8e9ef;
-  --pm-muted: #a4a7b5;
-  --pm-line: rgba(255, 255, 255, 0.16);
-  --pm-line-hover: rgba(255, 255, 255, 0.32);
+  --pm-text: var(--pm-on-ink);
+  --pm-muted: var(--pm-on-ink-muted);
+  --pm-line: var(--pm-ink-line);
+  --pm-line-hover: var(--pm-ink-line-2);
   --pm-fill: rgba(255, 255, 255, 0.06);
-  --pm-accent: #ffd600;
+  --pm-accent: var(--pm-lemon);
   color-scheme: dark;
   color: var(--pm-text);
-  font-size: 13px;
+  font-size: 14.5px;
   line-height: 1;
 }
 
@@ -45,6 +330,33 @@
   justify-content: center !important;
   gap: 8px 22px !important;
   margin: 8px 0 0 !important;
+}
+
+/* Used by pm-static.js to measure the row's natural width. */
+#umapControls > div.pm-measure {
+  width: max-content !important;
+}
+
+/* Wide screens, fullscreen map: the row moves into the band between the
+   Control and Search panels, so the map gets that height back. */
+body.pm-controls-inline #umapFloatingWindow:has(#umapResizeFullscreen.active) #umapControls {
+  position: fixed !important;
+  left: 50%;
+  width: max-content !important;
+  bottom: var(--pm-band-bottom, 12px) !important;
+  height: var(--pm-band-height, 52px) !important;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  z-index: 4001;
+}
+
+body.pm-controls-inline #umapFloatingWindow:has(#umapResizeFullscreen.active) #umapControls > div,
+body.pm-controls-inline #umapFloatingWindow:has(#umapResizeFullscreen.active) #umapControls > div > *,
+#umapControls > div.pm-measure,
+#umapControls > div.pm-measure > * {
+  margin: 0 !important;
+  flex-wrap: nowrap !important;
 }
 
 #umapEpsContainer:not([style*="none"]),
@@ -66,18 +378,17 @@
   margin-left: 16px;
 }
 
-/* Cluster strength field */
 #umapEpsSpinner {
   box-sizing: border-box;
   width: 66px !important;
   height: 28px;
   padding: 0 4px 0 9px;
   border: 1px solid var(--pm-line);
-  border-radius: 7px;
+  border-radius: 8px;
   background: var(--pm-fill);
   color: var(--pm-text);
   font: inherit;
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: lining-nums tabular-nums;
 }
 
 #umapEpsSpinner:hover {
@@ -89,14 +400,14 @@
   border-color: var(--pm-accent);
 }
 
-/* "Click selects" as a two-part switch */
+/* "Click selects": a two-part switch */
 #umapClickBehaviorContainer {
   flex-direction: row !important;
   gap: 2px !important;
   margin: 0 !important;
   padding: 2px;
   border: 1px solid var(--pm-line);
-  border-radius: 8px;
+  border-radius: 9px;
   font-size: inherit !important;
 }
 
@@ -104,7 +415,7 @@
   position: relative;
   height: 22px;
   padding: 0 10px;
-  border-radius: 6px;
+  border-radius: 7px;
   color: var(--pm-muted);
   font-size: inherit !important;
   transition: background-color 0.15s, color 0.15s;
@@ -115,8 +426,8 @@
 }
 
 #umapClickBehaviorContainer label:has(input:checked) {
-  background: rgba(255, 255, 255, 0.13);
-  color: #fff;
+  background: var(--pm-on-ink);
+  color: var(--pm-ink);
 }
 
 #umapClickBehaviorContainer input[type="radio"] {
@@ -133,7 +444,7 @@
 #umapColorModeContainer label {
   gap: 7px !important;
   height: 28px;
-  padding: 0 11px 0 9px;
+  padding: 0 12px 0 9px;
   border: 1px solid var(--pm-line);
   border-radius: 999px;
   color: var(--pm-muted);
@@ -154,7 +465,6 @@
   color: var(--pm-text);
 }
 
-/* Map options first, then the window behavior option. */
 #umapColorModeContainer label:has(#umapShowLandmarks) { order: 1; }
 #umapColorModeContainer label:has(#umapShowHoverThumbnails) { order: 2; }
 #umapColorModeContainer label:has(#umapHighlightSelection) { order: 3; }
@@ -183,7 +493,7 @@
 #umapColorModeContainer input[type="checkbox"]:checked {
   border-color: var(--pm-accent);
   background-color: var(--pm-accent);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M1.8 5.2l2.1 2.1 4.3-4.6' fill='none' stroke='%231c1c1c' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M1.8 5.2l2.1 2.1 4.3-4.6' fill='none' stroke='%2322212a' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
 }
 
 #umapControls label:has(input:focus-visible) {
@@ -204,8 +514,263 @@
   color: var(--pm-text) !important;
 }
 
+/* ------------------------------------------------------------------
+   Other floating things: ink, with the print's colors as accents.
+   ------------------------------------------------------------------ */
+#textSearchPanel,
+.modal-content,
+.about-modal,
+#bookmarkActionsMenu,
+.filename-banner {
+  background: var(--pm-ink) !important;
+  color: var(--pm-on-ink);
+  border: 1px solid var(--pm-ink-line) !important;
+  border-radius: 14px !important;
+  box-shadow: 0 18px 44px rgba(34, 33, 42, 0.35) !important;
+}
+
+#textSearchPanel {
+  bottom: 84px !important;
+  right: 12px !important;
+}
+
+.search-label,
+.search-label[for="searchInput"],
+.search-label[for="negativeSearchInput"],
+.search-image-label,
+.setting-row label,
+#slideshowSettingsLabel,
+.update-message {
+  color: var(--pm-lemon) !important;
+  font-weight: 500 !important;
+}
+
+.search-label,
+.search-image-label,
+.setting-row label {
+  font-size: 16px !important;
+}
+
+#searchInput,
+#negativeSearchInput,
+.search-field-wrapper input[type="text"],
+.modal-content input[type="text"],
+.modal-content input[type="number"],
+.settings-modal input[type="text"],
+.settings-modal input[type="number"],
+#highWaterMarkInput {
+  background: var(--pm-ink-2) !important;
+  border: 1px solid var(--pm-ink-line) !important;
+  border-radius: 9px !important;
+  color: var(--pm-on-ink) !important;
+  font-family: var(--pm-serif) !important;
+}
+
+#searchInput:focus,
+#negativeSearchInput:focus,
+.search-field-wrapper input[type="text"]:focus {
+  outline: none;
+  border-color: var(--pm-lemon) !important;
+}
+
+#doSearchBtn {
+  background: var(--pm-lemon) !important;
+  color: var(--pm-ink) !important;
+  font-weight: 600 !important;
+  border-radius: 9px !important;
+}
+
+#clearTextSearchBtn,
+#clearNegativeTextSearchBtn {
+  background: transparent !important;
+  color: var(--pm-on-ink-muted) !important;
+}
+
+.weight-slider-bar {
+  background: var(--pm-ink-2) !important;
+}
+
+.weight-slider-fill {
+  background: var(--pm-lemon) !important;
+}
+
+.weight-slider-value {
+  color: var(--pm-on-ink-muted) !important;
+  font-family: var(--pm-serif) !important;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+.search-thumb-placeholder {
+  background: var(--pm-ink-2) !important;
+  border-color: var(--pm-ink-line-2) !important;
+}
+
+.about-author a,
+.about-links-row a,
+.metadata-link {
+  color: var(--pm-lemon) !important;
+}
+
+.about-modal-header h2 {
+  font-weight: 500;
+}
+
+#filenameText {
+  color: var(--pm-lemon) !important;
+}
+
+.drawer-handle {
+  background: var(--pm-ink) !important;
+  box-shadow: 0 6px 18px rgba(34, 33, 42, 0.25) !important;
+}
+
+.drawer-arrow {
+  color: var(--pm-on-ink) !important;
+  filter: none !important;
+}
+
+#bookmarkActionsMenu {
+  padding: 6px !important;
+}
+
+#bookmarkActionsMenu > div:first-child {
+  color: var(--pm-lemon) !important;
+  border-bottom-color: var(--pm-ink-line) !important;
+}
+
+.modal-overlay {
+  background: rgba(34, 33, 42, 0.45) !important;
+}
+
+/* ------------------------------------------------------------------
+   Grid view: photos on plain paper.
+   ------------------------------------------------------------------ */
+#gridViewContainer,
+#gridViewSwiper,
+#gridViewSwiper .swiper-slide {
+  background-color: var(--pm-paper) !important;
+}
+
+#gridViewSwiper .swiper-slide img {
+  background: transparent !important;
+}
+
+.swiper.grid-mode .swiper-slide.current-slide {
+  border: 3px solid var(--pm-ink) !important;
+  border-radius: 10px !important;
+  box-shadow: none !important;
+}
+
+.bookmark-icon {
+  background: rgba(34, 33, 42, 0.55) !important;
+}
+
+/* ------------------------------------------------------------------
+   Toast for the search model download.
+   ------------------------------------------------------------------ */
+.pm-static-toast {
+  position: fixed;
+  left: 50%;
+  top: 16px;
+  transform: translateX(-50%);
+  z-index: 100000;
+  max-width: calc(100vw - 32px);
+  padding: 10px 16px;
+  border-radius: 12px;
+  background: var(--pm-ink);
+  color: var(--pm-on-ink);
+  font: 16px/1.35 var(--pm-serif);
+  box-shadow: 0 10px 28px rgba(34, 33, 42, 0.3);
+  pointer-events: none;
+}
+
+.pm-static-toast-error {
+  background: #8c1e2a;
+}
+
+/* ------------------------------------------------------------------
+   Phones: both panels share one row of icons along the bottom.
+   ------------------------------------------------------------------ */
+@media (max-width: 600px) {
+  #panelStackContainer {
+    flex-direction: row !important;
+    justify-content: space-between;
+    gap: 6px;
+    padding: 0 6px 6px;
+    box-sizing: border-box;
+  }
+
+  #controlPanel,
+  #searchPanel {
+    width: auto !important;
+    flex: 1 1 auto;
+    padding: 4px 2px !important;
+    border-radius: 12px !important;
+  }
+
+  #controlPanel { order: 0 !important; }
+  #searchPanel { order: 1 !important; }
+
+  #controlPanel .button-label,
+  #searchPanel .button-label {
+    display: none !important;
+  }
+
+  .control-icon-container,
+  .search-icon-container {
+    min-width: 0;
+  }
+
+  #controlPanel button,
+  #searchPanel button {
+    width: 34px !important;
+    min-width: 34px !important;
+    height: 38px !important;
+    min-height: 38px !important;
+  }
+
+  #umapFloatingWindow:has(#umapResizeFullscreen.active) {
+    height: var(--pm-phone-map-height, calc(100dvh - 120px)) !important;
+  }
+
+  #umapFloatingWindow:has(#umapResizeFullscreen.active) #umapControls {
+    position: static !important;
+    height: auto !important;
+  }
+
+  #umapControls {
+    font-size: 14px;
+  }
+
+  #umapTitlebar {
+    font-size: 16px !important;
+    padding-left: 8px !important;
+  }
+
+  #semanticMapTitle {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  #umapControls > div {
+    gap: 7px 12px !important;
+  }
+
+  #umapControls .pm-group-label {
+    margin-left: 4px;
+  }
+
+  #umapColorModeContainer label:has(#umapExitFullscreenOnSelection) {
+    margin-left: 0;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  #umapControls label {
+  #umapControls label,
+  #controlPanel button,
+  #searchPanel button {
     transition: none;
   }
 }

@@ -246,6 +246,143 @@
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", polishMapControls);
   else polishMapControls();
 
+  // ------------------------------------------------------------------ look
+
+  // The site's look comes from a print Hanna likes: translucent yellow, pink
+  // and blue planes that darken where they overlap, around a white middle.
+  // Colors live in pm-static.css; the cluster palette is patched into
+  // cluster-utils.js by the exporter.
+  const INK = "#22212a";
+
+  // Map: the coordinates mean nothing, so no grid, ticks or axis labels.
+  // The current photo gets a white marker, since yellow is a cluster color now.
+  if (window.Plotly) {
+    const newPlot = Plotly.newPlot.bind(Plotly);
+    Plotly.newPlot = (div, data, layout = {}, config) => {
+      const id = typeof div === "string" ? div : div?.id;
+      if (id === "umapPlot") {
+        const bare = { showgrid: false, zeroline: false, showticklabels: false, showline: false, ticks: "" };
+        layout.xaxis = { ...layout.xaxis, ...bare };
+        layout.yaxis = { ...layout.yaxis, ...bare };
+        layout.margin = { t: 6, r: 6, b: 6, l: 6, pad: 0 };
+        layout.modebar = { bgcolor: "rgba(0,0,0,0)", color: "#8f8d9c", activecolor: "#f5e45a" };
+        for (const trace of data || []) {
+          if (trace.name === "Current Image") {
+            trace.marker = { ...trace.marker, color: "#ffffff", size: 15, line: { color: INK, width: 3 } };
+          }
+        }
+      }
+      return newPlot(div, data, layout, config);
+    };
+  }
+
+  // Fullscreen map: umap.js asks how much height to leave for the title bar,
+  // the map controls and the Control/Search panels (PhotoMap leaves 230 px).
+  // When the map controls fit between the two panels, they share that band.
+  window.pmMapReserve = () => {
+    const body = document.body;
+    const rect = (id) => document.getElementById(id)?.getBoundingClientRect();
+    const title = document.getElementById("umapTitlebar")?.offsetHeight || 40;
+    // Measured at the full window width: PhotoMap calls this before it widens the window.
+    const controlsH = () => {
+      const c = document.getElementById("umapControls");
+      if (!c) return 44;
+      const saved = c.style.width;
+      c.style.width = window.innerWidth - 8 + "px";
+      const h = c.offsetHeight;
+      c.style.width = saved;
+      return h + 8;
+    };
+    if (window.innerWidth <= 600) {
+      // Phones: the map window stops just above the row of panel icons, and
+      // its controls sit under the plot (pm-static.css undoes PhotoMap's
+      // overlay positioning).
+      body.classList.remove("pm-controls-inline");
+      const stack = rect("panelStackContainer");
+      const bandTop = stack?.height ? stack.top : window.innerHeight - 60;
+      document.documentElement.style.setProperty("--pm-phone-map-height", Math.round(bandTop - 6) + "px");
+      return Math.ceil(window.innerHeight - bandTop + 6 + title + 14 + controlsH());
+    }
+    const cp = rect("controlPanel"), sp = rect("searchPanel");
+    const panelH = Math.max(cp?.height || 0, sp?.height || 0);
+    const bottom = cp ? window.innerHeight - cp.bottom : 12;
+    const band = panelH ? panelH + bottom + 10 : 16;
+    const row = document.querySelector("#umapControls > div");
+    let inline = false;
+    if (row && cp?.width && sp?.width) {
+      row.classList.add("pm-measure");
+      const need = row.offsetWidth;
+      row.classList.remove("pm-measure");
+      inline = need + 48 <= sp.left - cp.right;
+    }
+    body.classList.toggle("pm-controls-inline", inline);
+    document.documentElement.style.setProperty("--pm-band-bottom", bottom + "px");
+    document.documentElement.style.setProperty("--pm-band-height", panelH + "px");
+    return title + 10 + (inline ? 0 : controlsH()) + band;
+  };
+
+  // PhotoMap fills in parts of the control row after it sizes the map (and
+  // the web font can arrive late), so redo the fullscreen layout whenever
+  // the row changes size. PhotoMap's own resize handler does the work.
+  function watchMapControls() {
+    const controls = document.getElementById("umapControls");
+    if (!controls || !window.ResizeObserver) return;
+    let last = "", queued = false;
+    new ResizeObserver(() => {
+      if (queued) return;
+      queued = true;
+      requestAnimationFrame(() => {
+        queued = false;
+        const r = controls.getBoundingClientRect();
+        const size = `${Math.round(r.width)}x${Math.round(r.height)}`;
+        const full = document.getElementById("umapResizeFullscreen")?.classList.contains("active");
+        if (size !== last && last && full) window.dispatchEvent(new Event("resize"));
+        last = size;
+      });
+    }).observe(controls);
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", watchMapControls);
+  else watchMapControls();
+
+  // The planes behind the slideshow. Drawn in a 1000 x 1000 box stretched
+  // to the window, so they hug the edges at any shape; the photo covers the
+  // middle. Each plane multiplies with what's under it, like ink.
+  const PLANES = `
+<svg viewBox="0 0 1000 1000" preserveAspectRatio="none" focusable="false">
+  <defs>
+    <filter id="pmSoft" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="5"/></filter>
+    <linearGradient id="pmPinkFade" x1="0" x2="1" y1="0" y2="0">
+      <stop offset="0" stop-color="#ec8db4"/><stop offset=".7" stop-color="#f4b9d0"/><stop offset="1" stop-color="#f4b9d0" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="pmSkyFade" x1="1" x2="0" y1="0" y2="0">
+      <stop offset="0" stop-color="#3f9fe0"/><stop offset=".75" stop-color="#7cc0ec"/><stop offset="1" stop-color="#7cc0ec" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <polygon class="p-lemon" points="190,0 820,0 772,92 545,122 330,66"/>
+  <polygon class="p-ember" points="78,0 215,0 152,186 106,258"/>
+  <polygon class="p-ink"   points="0,64 70,44 44,176 0,300"/>
+  <polygon class="p-fade"  fill="url(#pmPinkFade)" filter="url(#pmSoft)" points="0,108 142,40 186,520 122,1000 0,1000"/>
+  <polygon class="p-lemon" points="0,772 176,744 232,1000 0,1000"/>
+  <polygon class="p-ember" points="0,882 36,872 50,1000 0,1000"/>
+  <polygon class="p-lemon" points="214,956 430,966 446,1000 200,1000"/>
+  <polygon class="p-ember" points="768,0 906,0 842,228 760,300"/>
+  <polygon class="p-sea"   points="872,0 1000,0 1000,252 906,322 846,148"/>
+  <polygon class="p-fade"  fill="url(#pmSkyFade)" filter="url(#pmSoft)" points="1000,168 1000,1000 736,1000 816,690 880,402"/>
+  <polygon class="p-sky"   points="540,962 744,890 792,1000 514,1000"/>
+  <polygon class="p-violet" points="1000,648 1000,1000 806,1000 884,804"/>
+  <polygon class="p-ink"   points="962,372 1000,360 1000,1000 942,1000 954,668"/>
+</svg>`;
+  function addPlanes() {
+    if (document.getElementById("pmPlanes")) return;
+    const div = document.createElement("div");
+    div.id = "pmPlanes";
+    div.setAttribute("aria-hidden", "true");
+    div.innerHTML = PLANES;
+    document.body.prepend(div);
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", addPlanes);
+  else addPlanes();
+
   // ------------------------------------------------------------------ map clusters
 
   // DBSCAN, matching scikit-learn's labels exactly (same point order, same

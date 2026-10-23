@@ -1459,7 +1459,7 @@ function setUmapWindowSize(sizeKey) {
     if (contentDiv) contentDiv.style.display = "block";
     // controlsHeight: space reserved below plot for UMAP controls (~120px with radio buttons)
     // plus clearance for bottom ControlPanel/SearchPanel (~110px)
-    const controlsHeight = 230;
+    const controlsHeight = window.pmMapReserve ? window.pmMapReserve() : 230;
     win.style.left = "0px";
     win.style.top = "0px";
     win.style.width = window.innerWidth + "px";

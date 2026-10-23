@@ -3,27 +3,26 @@
 
 // Standard cluster color palette used across the application
 export const CLUSTER_PALETTE = [
-  "#e41a1c",
-  "#377eb8",
-  "#4daf4a",
-  "#984ea3",
-  "#ff7f00",
-  "#ffff33",
-  "#a65628",
-  "#f781bf",
-  "#999999",
-  "#66c2a5",
-  "#fc8d62",
-  "#8da0cb",
-  "#e78ac3",
-  "#a6d854",
-  "#ffd92f",
-  "#e5c494",
-  "#b3b3b3",
+  "#f5e45a",
+  "#4aa6e2",
+  "#f09cbe",
+  "#4fb7b0",
+  "#f19e6c",
+  "#9a8ae0",
+  "#7fd0ee",
+  "#e8608f",
+  "#f7c948",
+  "#3d7fd1",
+  "#f6bca5",
+  "#c9a3e8",
+  "#d9e98a",
+  "#e58a5a",
+  "#b8e0f5",
+  "#a8d8c8",
 ];
 
 // Color for unclustered images
-export const UNCLUSTERED_COLOR = "#cccccc";
+export const UNCLUSTERED_COLOR = "#5f5e6b";
 
 /**
  * Get the color for a specific cluster based on UMAP points

@@ -65,11 +65,17 @@ page asks search engines not to index it.
   PhotoMap's Python), copies the photos (HEIC is converted to JPEG), makes
   WebP thumbnails, and writes `data/` (slide list, map coordinates, CLIP
   vectors). It renders PhotoMap's page in album-locked mode and copies its
-  scripts, rewriting the four places that build thumbnail URLs. Options:
+  scripts, rewriting the four places that build thumbnail URLs, the cluster
+  colors, and the space the fullscreen map leaves for its controls. Options:
   `--out`, `--max-size`, `--quality`, `--thumb-size`, `--title`, `--config`.
 - `shim/pm-static.js` loads before PhotoMap's scripts and answers their server
   requests from `data/`: clustering (DBSCAN, same labels as scikit-learn), CLIP
-  search with transformers.js, and ZIP downloads. `shim/pm-static.css` restyles
-  the map controls.
+  search with transformers.js, and ZIP downloads. It also strips the map's
+  grid and axis labels and draws the colored planes behind the slideshow.
+- `shim/pm-static.css` gives the site its look, taken from a print Hanna
+  likes: photos on off-white paper with translucent yellow, pink and blue
+  planes at the edges, a near-black map and panels, and Crimson Pro type.
+  The bottom panels are slim, and on wide screens the map controls share
+  their row so the fullscreen map gets most of the height.
 - `shim/pm-sw.js` is a service worker that draws the cluster-colored frames
   around map thumbnails, which PhotoMap's server normally draws.

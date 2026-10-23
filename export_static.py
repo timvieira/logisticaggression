@@ -160,6 +160,35 @@ def patch_thumbnail_urls(js_dir):
     return total
 
 
+# Cluster colors drawn from the inks of the print Hanna likes (yellow, pink and
+# blue planes and where they overlap), tuned to read on the dark map.
+CLUSTER_PALETTE = [
+    "#f5e45a", "#4aa6e2", "#f09cbe", "#4fb7b0", "#f19e6c", "#9a8ae0",
+    "#7fd0ee", "#e8608f", "#f7c948", "#3d7fd1", "#f6bca5", "#c9a3e8",
+    "#d9e98a", "#e58a5a", "#b8e0f5", "#a8d8c8",
+]
+UNCLUSTERED_COLOR = "#5f5e6b"
+
+
+def patch_text(path, old_re, new, what):
+    text = path.read_text()
+    new_text, n = re.subn(old_re, lambda m: new, text, count=1)
+    if n != 1:
+        sys.exit(f"error: couldn't find {what} in {path.name}; PhotoMap's frontend has changed")
+    path.write_text(new_text)
+
+
+def patch_style(js_dir):
+    """Recolor the clusters, and let pm-static.js size the fullscreen map."""
+    palette = "[\n" + "".join(f'  "{c}",\n' for c in CLUSTER_PALETTE) + "]"
+    patch_text(js_dir / "cluster-utils.js", r"(?<=CLUSTER_PALETTE = )\[[^\]]*\]", palette, "the cluster palette")
+    patch_text(js_dir / "cluster-utils.js", r'(?<=UNCLUSTERED_COLOR = )"#[0-9a-fA-F]{6}"',
+               f'"{UNCLUSTERED_COLOR}"', "the unclustered color")
+    patch_text(js_dir / "umap.js", r"const controlsHeight = 230;",
+               "const controlsHeight = window.pmMapReserve ? window.pmMapReserve() : 230;",
+               "the fullscreen map's reserved height")
+
+
 def render_page(frontend, album_key, version, title):
     from jinja2 import Environment, FileSystemLoader
 
@@ -178,6 +207,10 @@ def render_page(frontend, album_key, version, title):
         sys.exit("error: main.html no longer loads static/main.js; PhotoMap's frontend has changed")
     shim_tags = (
         '<meta name="robots" content="noindex, nofollow" />\n'
+        '    <link rel="preconnect" href="https://fonts.googleapis.com" />\n'
+        '    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />\n'
+        '    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Crimson+Pro:'
+        'ital,wght@0,400;0,500;0,600;1,400&display=swap" />\n'
         '    <link rel="stylesheet" href="pm-static/pm-static.css" />\n'
         '    <script src="pm-static/pm-static.js"></script>\n'
         f"    {module_tag}"
@@ -380,6 +413,7 @@ def main():
     shutil.rmtree(out / "static", ignore_errors=True)
     shutil.copytree(frontend / "static", out / "static")
     patched = patch_thumbnail_urls(out / "static" / "javascript")
+    patch_style(out / "static" / "javascript")
     (out / "index.html").write_text(render_page(frontend, key, version, title))
     shutil.rmtree(out / "pm-static", ignore_errors=True)
     (out / "pm-static").mkdir()
